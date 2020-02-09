@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     private AMapLocationClientOption mLocationOption = null;
     //定位监听器
     private LocationSource.OnLocationChangedListener mListener = null;
-    //
+    //定位标志
     private boolean isFirstLoc=true;
 
     @Override
@@ -157,16 +157,17 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         mMapView.onSaveInstanceState(outState);
     }
 
+    //启动定位
     @Override
     public void activate(OnLocationChangedListener onLocationChangedListener) {
         mListener = onLocationChangedListener;
     }
-
+    //停止定位
     @Override
     public void deactivate() {
         mListener = null;
     }
-
+    //定位监听回调
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
         if (aMapLocation != null) {
