@@ -5,6 +5,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
@@ -43,6 +45,11 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     private LocationSource.OnLocationChangedListener mListener = null;
     //定位标志
     private boolean isFirstLoc=true;
+
+    //用户界面元素
+    private Button Select_btn_bom=findViewById(R.id.select_button_bottom);
+    private AutoCompleteTextView Select_Text_top=findViewById(R.id.select_button_top);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
