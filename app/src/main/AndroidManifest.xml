@@ -35,7 +35,9 @@
         <!--高德Key-->
         <meta-data android:name="com.amap.api.v2.apikey"
             android:value="88adb0252601151d4cb03a5b43fe3df1"/>
-        <service android:name="com.amap.api.location.APSService"></service>
+
+        <service android:name="com.amap.api.location.APSService"/>
+
         <activity android:name=".MainActivity">
 
             <intent-filter>
