@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
@@ -36,20 +37,15 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     MapView mMapView=null;
     AMap aMap=null;
     MyLocationStyle myLocationStyle=null;
+
     //定位需要的声明
-    //定位发起端
     private AMapLocationClient mLocationClient = null;
-    //定位参数
     private AMapLocationClientOption mLocationOption = null;
-    //定位监听器
     private LocationSource.OnLocationChangedListener mListener = null;
-    //定位标志
     private boolean isFirstLoc=true;
 
     //用户界面元素
     private Button Select_btn_bom=findViewById(R.id.select_button_bottom);
-    private AutoCompleteTextView Select_Text_top=findViewById(R.id.select_button_top);
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +89,12 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         }
         // 开启定位
         initLoc();
+        Select_btn_bom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //todo 打开aps界面
+            }
+        });
     }
 
     //初始化定位
