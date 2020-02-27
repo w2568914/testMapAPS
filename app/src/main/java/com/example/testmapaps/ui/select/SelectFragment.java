@@ -33,7 +33,8 @@ public class SelectFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mViewModel = ViewModelProviders.of(this).get(SelectViewModel.class);
-        // TODO: Use the ViewModel
+        // TODO: 使用viewmodel
+
     }
 
 }

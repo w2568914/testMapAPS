@@ -4,4 +4,11 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="title_activity_aps">apsActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <string name="driving_route">驾车</string>
+    <string name="busing_route">公交</string>
+    <string name="biking_route">骑行</string>
+    <string name="walking_route">步行</string>
 </resources>

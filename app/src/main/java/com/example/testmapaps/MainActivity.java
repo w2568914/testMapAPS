@@ -3,10 +3,10 @@ package com.example.testmapaps;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -20,18 +20,37 @@ import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.LatLngBounds;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.PolylineOptions;
+import com.amap.api.maps.model.RouteOverlay;
+import com.amap.api.services.core.AMapException;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.route.BusRouteResult;
+import com.amap.api.services.route.DrivePath;
+import com.amap.api.services.route.DriveRouteResult;
+import com.amap.api.services.route.DriveStep;
+import com.amap.api.services.route.RideRouteResult;
+import com.amap.api.services.route.RouteResult;
+import com.amap.api.services.route.RouteSearch;
+import com.amap.api.services.route.WalkRouteResult;
 import com.tencent.bugly.Bugly;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-public class MainActivity extends AppCompatActivity implements LocationSource, AMapLocationListener {
+public class MainActivity extends AppCompatActivity implements LocationSource, AMapLocationListener, RouteSearch.OnRouteSearchListener {
+
     //地图样式参数
     private static final int WRITE_COARSE_LOCATION_REQUEST_CODE = 0;
     MapView mMapView=null;
@@ -44,8 +63,14 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     private LocationSource.OnLocationChangedListener mListener = null;
     private boolean isFirstLoc=true;
 
+    //路线规划参数
+    private com.amap.api.services.core.LatLonPoint user_loc=null;
+    private com.amap.api.services.core.LatLonPoint goal_loc=null;
+    private RouteSearch.FromAndTo fromAndTo=null;
+    private RouteSearch routeSearch=null;
+
     //用户界面元素
-    private Button Select_btn_bom=findViewById(R.id.select_button_bottom);
+    private Button Select_btn_bom=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         mMapView.onCreate(savedInstanceState);
         //初始化地图组件
         init();
+        //设置自定义弹窗弹窗
+        //aMap.setInfoWindowAdapter(this);
     }
 
     // 初始化AMap对象
@@ -79,22 +106,118 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
             //显示定位层并且可以触发定位,默认是flase
             aMap.setMyLocationEnabled(true);
             // 创建一个设置放大级别的CameraUpdate
-            CameraUpdate cu = CameraUpdateFactory.zoomTo(20);
+            CameraUpdate cu = CameraUpdateFactory.zoomTo(14);
             // 设置地图的默认放大级别
             aMap.moveCamera(cu);
             // 创建一个更改地图倾斜度的CameraUpdate
             CameraUpdate tiltUpdate = CameraUpdateFactory.changeTilt(30);
             // 改变地图的倾斜度
             aMap.moveCamera(tiltUpdate);
+            //设置点击事件
+            aMap.setOnMarkerClickListener(new AMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    return false;
+                }
+            });
         }
         // 开启定位
         initLoc();
+
+        //todo 预设目的地
+        this.goal_loc= new com.amap.api.services.core.LatLonPoint(30.3126719672,120.3566998243);
+
+        Select_btn_bom=findViewById(R.id.select_button_bottom);
         Select_btn_bom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //todo 打开aps界面
+               /* //todo 打开aps界面
+                final Intent aps_intent=new Intent(MainActivity.this,apsActivity.class);
+                startActivity(aps_intent);*/
+                //todo 测试绘制路线
+                if(!startRouteSreach(user_loc,goal_loc,1)){
+                    Toast.makeText(MainActivity.this,"进行驾车路线规划失败",Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    //进行路线规划
+    private boolean startRouteSreach(com.amap.api.services.core.LatLonPoint start, com.amap.api.services.core.LatLonPoint end, int Code){
+        if (routeSearch == null) {
+            routeSearch = new RouteSearch(this);
+        }
+        if (start != null && end != null) {
+            fromAndTo = new RouteSearch.FromAndTo(start, end);
+        }
+        routeSearch.setRouteSearchListener(this);
+        //todo 分类规划
+        switch(Code){
+            case 1:
+                RouteSearch.DriveRouteQuery driveRouteQuery = new RouteSearch.DriveRouteQuery(
+                        fromAndTo, RouteSearch.DRIVING_MULTI_STRATEGY_FASTEST_SHORTEST_AVOID_CONGESTION, null, null, "");
+                routeSearch.calculateDriveRouteAsyn(driveRouteQuery);
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    //路线绘制
+    private void drawRouteToMap(RouteResult result,int code){
+        //记录起点终点
+        LatLng routeStart=new LatLng(result.getStartPos().getLatitude(),result.getStartPos().getLongitude());
+        LatLng routeEnd=new LatLng(result.getTargetPos().getLatitude(),result.getTargetPos().getLongitude());
+        //创建存储坐标点的集合
+        List<LatLng> latLngs = new ArrayList<>();
+
+        //分类记录路径
+        switch (code) {
+            case 1:
+                //todo 路径并不唯一
+                DriveRouteResult driveRouteResult=(DriveRouteResult)result;
+                List<DrivePath> paths=driveRouteResult.getPaths();
+                for(DrivePath mDrivePath:paths) {
+                    for(DriveStep mDriveStep:mDrivePath.getSteps()){
+                        for(LatLonPoint mLatLonPoint:mDriveStep.getPolyline()){
+                            latLngs.add(new LatLng(mLatLonPoint.getLatitude(),mLatLonPoint.getLongitude()));
+                        }
+                    }
+                }
+                break;
+            default:
+                return;
+        }
+
+        //先清除一下,避免重复显示
+        aMap.clear();
+
+        //绘制起始位置和目的地marker
+        aMap.addMarker(new MarkerOptions()
+                .icon(null)
+                .position(routeStart));
+        aMap.addMarker(new MarkerOptions()
+                .icon(null)
+                .position(routeEnd));
+
+        //绘制规划路径路线
+        aMap.addPolyline(new PolylineOptions()
+                        //路线坐标点的集合
+                        .addAll(latLngs)
+                        //线的宽度
+                        .width(30)
+                        .color(getResources().getColor(R.color.design_default_color_primary_dark)));//设置画线的颜色
+
+                //显示完整包含所有marker地图路线
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (int i = 0; i < latLngs.size(); i++) {
+            builder.include(latLngs.get(i));
+        }
+        //显示全部marker,第二个参数是四周留空宽度
+        aMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(),200));
+
     }
 
     //初始化定位
@@ -178,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         mListener = null;
     }
     //定位监听回调
+    //todo 标志位可能导致定位不准
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
         if (aMapLocation != null) {
@@ -203,7 +327,11 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
                 // 如果不设置标志位，此时再拖动地图时，它会不断将地图移动到当前的位置
                 if (isFirstLoc) {
                     //设置缩放级别
-                    aMap.moveCamera(CameraUpdateFactory.zoomTo(20));
+                    aMap.moveCamera(CameraUpdateFactory.zoomTo(14));
+                    //todo 记录用户当前位置
+                    this.user_loc= new com.amap.api.services.core.LatLonPoint(aMapLocation.getLatitude(),
+                            aMapLocation.getLongitude());
+                    Toast.makeText(MainActivity.this,this.user_loc.toString(),Toast.LENGTH_SHORT).show();
                     //将地图移动到定位点
                     aMap.moveCamera(CameraUpdateFactory.changeLatLng(new LatLng(aMapLocation.getLatitude(),
                             aMapLocation.getLongitude())));
@@ -218,6 +346,66 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
                         + aMapLocation.getErrorInfo());
                 Toast.makeText(getApplicationContext(), "定位失败", Toast.LENGTH_LONG).show();
             }
+        }
+    }
+
+    //公交路线规划
+    @Override
+    public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
+        aMap.clear();// 清理地图上的所有覆盖物
+        if (i == AMapException.CODE_AMAP_SUCCESS) {
+
+        }
+    }
+    //驾车路线规划
+    @Override
+    public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int i) {
+        // 清理地图上的所有覆盖物
+        aMap.clear();
+        if (i == AMapException.CODE_AMAP_SUCCESS) {
+            //获取路径结果
+            DrivePath drivePath=driveRouteResult.getPaths().get(0);
+            //策略
+            String strategy=drivePath.getStrategy();
+            //信号灯数量
+            int clights=drivePath.getTotalTrafficlights();
+            //距离
+            float distance=drivePath.getDistance()/1000;
+            //时间
+            long duration=drivePath.getDuration()/60;
+            //todo 显示信息
+            Log.e("test","策略："+strategy+
+                    "\n交通信号灯数量/个"+clights+
+                    "\n距离/公里"+distance+
+                    "\n时间/分"+duration);
+            //todo 调用函数进行路线绘制
+            drawRouteToMap(driveRouteResult,1);
+        }
+        else {
+            Log.e("test","路线规划失败");
+        }
+    }
+    //步行路线规划
+    @Override
+    public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {
+        aMap.clear();// 清理地图上的所有覆盖物
+        if (i == AMapException.CODE_AMAP_SUCCESS) {
+              /*  //在地图上绘制路径：
+                MyWalkRouteOverlay walkRouteOverlay = new MyWalkRouteOverlay(getBaseContext(), mMapView.getMap(), walkRouteResult.getPaths().get(0), walkRouteResult.getStartPos(), walkRouteResult.getTargetPos());
+                walkRouteOverlay.setNodeIconVisibility(false);
+                walkRouteOverlay.removeFromMap();
+                walkRouteOverlay.addToMap();//将Overlay添加到地图上显示
+                walkRouteOverlay.zoomToSpan();//调整地图能看到起点和终点
+                lastWalkRouteOverlay = walkRouteOverlay;*/
+
+        }
+    }
+    //骑行路线规划
+    @Override
+    public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
+        aMap.clear();// 清理地图上的所有覆盖物
+        if (i == AMapException.CODE_AMAP_SUCCESS) {
+
         }
     }
 }
