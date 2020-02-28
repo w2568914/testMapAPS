@@ -1,9 +1,8 @@
-package com.example.testmapaps;
+package com.example.testmapaps.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,14 +19,12 @@ import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
-import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.LatLngBounds;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.maps.model.PolylineOptions;
-import com.amap.api.maps.model.RouteOverlay;
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.route.BusRouteResult;
@@ -38,6 +35,7 @@ import com.amap.api.services.route.RideRouteResult;
 import com.amap.api.services.route.RouteResult;
 import com.amap.api.services.route.RouteSearch;
 import com.amap.api.services.route.WalkRouteResult;
+import com.example.testmapaps.R;
 import com.tencent.bugly.Bugly;
 
 import java.text.SimpleDateFormat;
@@ -125,7 +123,8 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         initLoc();
 
         //todo 预设目的地
-        this.goal_loc= new com.amap.api.services.core.LatLonPoint(30.3126719672,120.3566998243);
+        this.goal_loc= new com.amap.api.services.core.LatLonPoint(46.594623,125.094923);
+        //(30.3126719672,120.3566998243);
 
         Select_btn_bom=findViewById(R.id.select_button_bottom);
         Select_btn_bom.setOnClickListener(new View.OnClickListener() {
@@ -176,14 +175,20 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         //分类记录路径
         switch (code) {
             case 1:
-                //todo 路径并不唯一
                 DriveRouteResult driveRouteResult=(DriveRouteResult)result;
+                /*多路径模式
                 List<DrivePath> paths=driveRouteResult.getPaths();
                 for(DrivePath mDrivePath:paths) {
                     for(DriveStep mDriveStep:mDrivePath.getSteps()){
                         for(LatLonPoint mLatLonPoint:mDriveStep.getPolyline()){
                             latLngs.add(new LatLng(mLatLonPoint.getLatitude(),mLatLonPoint.getLongitude()));
                         }
+                    }
+                }*/
+                DrivePath paths=driveRouteResult.getPaths().get(0);
+                for(DriveStep mDriveStep:paths.getSteps()){
+                    for(LatLonPoint mLatLonPoint:mDriveStep.getPolyline()){
+                        latLngs.add(new LatLng(mLatLonPoint.getLatitude(),mLatLonPoint.getLongitude()));
                     }
                 }
                 break;

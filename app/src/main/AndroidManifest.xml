@@ -31,7 +31,7 @@
 
         <service android:name="com.amap.api.location.APSService" />
 
-        <activity android:name=".MainActivity"
+        <activity android:name=".activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,12 +40,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".apsActivity"
+            android:name=".activity.apsActivity"
             android:label="@string/title_activity_aps"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>
-        <activity android:name=".selectActivity"
+        <activity android:name=".activity.selectActivity"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>

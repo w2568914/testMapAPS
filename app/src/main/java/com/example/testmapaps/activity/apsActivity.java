@@ -1,7 +1,8 @@
-package com.example.testmapaps;
+package com.example.testmapaps.activity;
 
 import android.os.Bundle;
 
+import com.example.testmapaps.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
