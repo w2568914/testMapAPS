@@ -5,10 +5,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import com.example.testmapaps.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+import static androidx.recyclerview.widget.RecyclerView.*;
 
 public class SearchAdapter extends BaseAdapter {
 
@@ -24,21 +31,24 @@ public class SearchAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 0;
+        return addressData.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return addressData.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return null;
+        ViewHolder vh = null;
+
+        return convertView;
+
     }
 }

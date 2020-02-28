@@ -24,6 +24,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
         <!-- 高德Key -->
         <meta-data
             android:name="com.amap.api.v2.apikey"
@@ -31,7 +33,8 @@
 
         <service android:name="com.amap.api.location.APSService" />
 
-        <activity android:name=".activity.MainActivity"
+        <activity
+            android:name=".activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,16 +42,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activity.SelectActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
         <activity
             android:name=".activity.apsActivity"
-            android:label="@string/title_activity_aps"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"/>
 
-        </activity>
-        <activity android:name=".activity.selectActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale"

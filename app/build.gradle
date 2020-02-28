@@ -43,4 +43,6 @@ dependencies {
     //bugly
     implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
     implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+    //通用adapter by鸿洋_
+    implementation 'com.zhy:base-rvadapter:3.0.3'
 }

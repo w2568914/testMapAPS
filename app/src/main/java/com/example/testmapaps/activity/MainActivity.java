@@ -1,6 +1,7 @@
 package com.example.testmapaps.activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -130,13 +131,13 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         Select_btn_bom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               /* //todo 打开aps界面
-                final Intent aps_intent=new Intent(MainActivity.this,apsActivity.class);
-                startActivity(aps_intent);*/
-                //todo 测试绘制路线
+               //todo 打开aps界面
+                final Intent aps_intent=new Intent(MainActivity.this,SelectActivity.class);
+                startActivity(aps_intent);
+               /* //todo 测试绘制路线
                 if(!startRouteSreach(user_loc,goal_loc,1)){
                     Toast.makeText(MainActivity.this,"进行驾车路线规划失败",Toast.LENGTH_SHORT).show();
-                }
+                }*/
             }
         });
     }
