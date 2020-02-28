@@ -139,19 +139,8 @@ public class SelectActivity extends AppCompatActivity implements TextWatcher,Poi
                     // 取得第一页的poiitem数据，页数从数字0开始
                     poiItems = poiResult.getPois();
 
-                    //todo 通过listview显示搜索结果
+                    //todo 显示搜索结果
                     //解析获取到的PoiItem列表
-                    for(PoiItem item : poiItems){
-                        //获取经纬度对象
-                        LatLonPoint llp = item.getLatLonPoint();
-                        double lon = llp.getLongitude();
-                        double lat = llp.getLatitude();
-                        //返回POI的名称
-                        String title = item.getTitle();
-                        //返回POI的地址
-                        String text = item.getSnippet();
-                        Log.e("test","地点："+title+"\n地名："+text);
-                    }
                     POI_list.setAdapter(new CommonAdapter<PoiItem>(this,R.layout.search_list_item,poiItems) {
                         @Override
                         protected void convert(ViewHolder holder, PoiItem poiItem, int position) {
